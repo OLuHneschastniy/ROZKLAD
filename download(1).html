@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Розклад занять</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #4a90e2;
+      color: white;
+      padding: 15px 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    #date {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .theme-toggle {
+      cursor: pointer;
+      font-size: 18px;
+      margin-left: 15px;
+    }
+    .controls {
+      text-align: center;
+      margin: 15px;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      background: #4a90e2;
+      color: white;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #357ab8;
+    }
+    .schedule {
+      max-width: 800px;
+      margin: auto;
+      padding: 15px;
+    }
+    .schedule h2 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #4a90e2;
+    }
+    .day {
+      background: white;
+      margin-bottom: 15px;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      transition: background 0.3s, color 0.3s;
+    }
+    .day h3 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+      color: #333;
+      border-bottom: 2px solid #4a90e2;
+      display: inline-block;
+      padding-bottom: 3px;
+    }
+    ul {
+      padding-left: 18px;
+      margin: 0;
+    }
+    li {
+      margin: 5px 0;
+      font-size: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .room {
+      background: #4a90e2;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin-left: 10px;
+      white-space: nowrap;
+    }
+    /* Стиль для відсутньої пари */
+    .absent {
+      text-align: center;
+      width: 100%;
+      font-style: italic;
+      color: #777;
+      display: block;
+    }
+    /* Темна тема */
+    body.dark {
+      background: #1e1e1e;
+      color: #e0e0e0;
+    }
+    body.dark header {
+      background: #222;
+    }
+    body.dark .day {
+      background: #2a2a2a;
+      color: #e0e0e0;
+    }
+    body.dark .schedule h2 {
+      color: #87ceeb;
+    }
+    body.dark .room {
+      background: #87ceeb;
+      color: #111;
+    }
+    body.dark .day h3 {
+      color: #87ceeb;
+      border-bottom-color: #87ceeb;
+    }
+    /* Адаптивність для телефонів */
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 18px;
+      }
+      button {
+        font-size: 13px;
+        padding: 8px 12px;
+      }
+      .day h3 {
+        font-size: 16px;
+      }
+      li {
+        font-size: 14px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .room {
+        margin-top: 5px;
+        margin-left: 0;
+      }
+      .absent {
+        font-size: 14px;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+  </style>
+  <script defer data-domain="rroazzkllaadd.tiiny.site" src="https://analytics.tiiny.site/js/plausible.js"></script>
+  <script type="text/javascript" src="https://tiiny.host/ad-script.js"></script>
+<script defer data-domain="rroazzkllaadd.tiiny.site" src="https://analytics.tiiny.site/js/plausible.js"></script><script type="text/javascript" src="https://tiiny.host/ad-script.js"></script></head>
+<body>
+  <header>
+    <div>
+      <div id="date"></div>
+    </div>
+    <div style="display:flex; align-items:center;">
+      <h1>Розклад занять</h1>
+      <span class="theme-toggle" onclick="toggleTheme()">🌙</span>
+    </div>
+  </header>
+
+  <div class="controls">
+    <button onclick="showWeek(1)">1-й тиждень</button>
+    <button onclick="showWeek(2)">2-й тиждень</button>
+    <button onclick="autoWeek()">Автовибір</button>
+  </div>
+
+  <div id="schedule" class="schedule"></div>
+
+  <script>
+    // Часи пар
+    const times = [
+      "9:00",
+      "10:40",
+      "12:30",
+      "14:00"
+    ];
+
+    // Предмети з кабінетами
+    const subjects = {
+      "Фізична культура": "з/м",
+      "Українська мова": "411",
+      "Українська література": "411",
+      "Іноземна мова": "419",
+      "Інформатика": "209",
+      "Історія України": "207",
+      "Фізика і астрономія": "423",
+      "Технології (М1 'Основи')": "324",
+      "Технології (М2 'Креслення')": "404",
+      "Біологія і екологія": "222",
+      "Основи теорії кіл": "317",
+      "Комп'ютерні технології": "414",
+      "Математика Алгебра": "426"
+    };
+
+    const schedules = {
+      1: {
+        "Пн": ["Комп'ютерні технології (Гончаров О.М.)", "Іноземна мова (Токарєва О.В.)", "Фізика і астрономія (Карпова Л.М.)"],
+        "Вт": ["Технології (М2 'Креслення')(Васильченко І.І.)", "Фізика і астрономія (Карпова Л.М.)", "Основи теорії кіл (Чорний О.А.)"],
+        "Ср": ["Фізична культура (Філіппов Д.В.)", "Інформатика (Житченко І.М.)", "Технології (М1 'Основи')(Андрєєв В.О.)"],
+        "Чт": ["Українська література (Прощенко І.М.)", "Біологія і екологія (Шайтанова О.М.)", "Математика Алгебра (Коваль І.А)"],
+        "Пт": ["Українська література (Прощенко І.М.)", "Історія України (Домніна Г.С.)", "Фізика і астрономія (Карпова Л.М.)", "Українська мова (Прощенко І.М.)"]
+      },
+      2: {
+        "Пн": ["Комп'ютерні технології (Гончаров О.М.)", "Іноземна мова (Токарєва О.В.)", "Фізика і астрономія (Карпова Л.М.)"],
+        "Вт": ["Технології (М2 'Креслення')(Васильченко І.І.)", "Фізика і астрономія (Карпова Л.М.)", "Основи теорії кіл (Чорний О.А.)"],
+        "Ср": ["Фізична культура (Філіппов Д.В.)", "Інформатика (Житченко І.М.)", "Технології (М1 'Основи')(Андрєєв В.О.)"],
+        "Чт": ["Українська література (Прощенко І.М.)", "Біологія і екологія (Шайтанова О.М.)", "Математика Алгебра (Коваль І.А)"],
+        "Пт": ["Фізична культура (Філіппов Д.В.)", "Історія України (Домніна Г.С.)", "Математика Алгебра (Коваль І.А)", "Українська мова (Прощенко І.М.)"]
+      }
+    };
+
+    function renderSchedule(week) {
+      const container = document.getElementById("schedule");
+      container.innerHTML = `<h2>${week}-й тиждень</h2>`;
+      for (let day in schedules[week]) {
+        let lessons = schedules[week][day];
+
+        // Масив з 4 елементів
+        let fullDay = Array(4).fill("Пара відсутня");
+        lessons.forEach((subj, i) => {
+          fullDay[i] = subj;
+        });
+
+        // Спец. випадок: понеділок немає 1-ї пари
+        if (day === "Пн") {
+          fullDay = ["Пара відсутня", ...lessons, "Пара відсутня"].slice(0, 4);
+        }
+        // Інші дні (крім Пт) – остання пара відсутня
+        if (day !== "Пт" && day !== "Пн") {
+          if (lessons.length < 4) {
+            fullDay[3] = "Пара відсутня";
+          }
+        }
+
+        container.innerHTML += `
+          <div class="day">
+            <h3>${day}</h3>
+            <ul>${fullDay.map((subj, i) => {
+              let room = "";
+              for (let key in subjects) {
+                if (subj.includes(key)) {
+                  room = subjects[key];
+                  break;
+                }
+              }
+              if (subj.includes("Пара відсутня")) {
+                return `<li class="absent">${subj}</li>`;
+              } else {
+                return `<li><span>${times[i]}</span> ${subj} ${room ? `<span class="room">${room}</span>` : ""}</li>`;
+              }
+            }).join('')}</ul>
+          </div>`;
+      }
+    }
+
+    function autoWeek() {
+      const startDate = new Date(2025, 1, 22);
+      const today = new Date();
+      const diffWeeks = Math.floor((today - startDate) / (7 * 24 * 60 * 60 * 1000));
+      const week = (diffWeeks % 2 === 0) ? 2 : 1;
+      renderSchedule(week);
+    }
+
+    function showWeek(week) {
+      renderSchedule(week);
+    }
+
+    function showDate() {
+      const now = new Date();
+      const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+      document.getElementById("date").textContent = now.toLocaleDateString('uk-UA', options);
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("dark");
+      const toggle = document.querySelector(".theme-toggle");
+      toggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+    }
+
+    window.onload = () => {
+      showDate();
+      autoWeek();
+    };
+
+    function setThemeByTime() {
+      const hour = new Date().getHours();
+      if (hour >= 19 || hour < 6) {
+        document.body.classList.add('dark');
+      } else {
+        document.body.classList.remove('dark');
+      }
+    }
+    setThemeByTime();
+  </script>
+</body>
+</html>
+
