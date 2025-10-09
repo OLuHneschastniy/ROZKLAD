@@ -72,7 +72,7 @@
       padding: 15px;
       border-radius: 12px;
       box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-      transition: background 0.3s, color 0.3s;
+      transition: background 0.3s, color 0.3s, border 0.3s;
     }
     .day h3 {
       margin: 0 0 10px 0;
@@ -110,6 +110,13 @@
       color: #777;
       display: block;
     }
+
+    /* --- НОВИЙ СТИЛЬ ДЛЯ ПОТОЧНОГО ДНЯ --- */
+    .day.current-day {
+        background-color: #e7f3ff;
+        border: 2px solid #4a90e2;
+    }
+
     /* Темна тема */
     body.dark {
       background: #1e1e1e;
@@ -133,6 +140,12 @@
       color: #87ceeb;
       border-bottom-color: #87ceeb;
     }
+    /* --- НОВИЙ СТИЛЬ ДЛЯ ПОТОЧНОГО ДНЯ (ТЕМНА ТЕМА) --- */
+    body.dark .day.current-day {
+      background-color: #2c3e50;
+      border-color: #87ceeb;
+    }
+
     /* Адаптивність для телефонів */
     @media (max-width: 600px) {
       header h1 {
@@ -230,6 +243,11 @@
     function renderSchedule(week) {
       const container = document.getElementById("schedule");
       container.innerHTML = `<h2>${week}-й тиждень</h2>`;
+
+      // --- ОНОВЛЕННЯ: Визначаємо назву поточного дня ---
+      const dayMap = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+      const currentDayName = dayMap[new Date().getDay()];
+
       for (let day in schedules[week]) {
         let lessons = schedules[week][day];
 
@@ -249,9 +267,15 @@
             fullDay[3] = "Пара відсутня";
           }
         }
+        
+        // --- ОНОВЛЕННЯ: Додаємо клас для поточного дня ---
+        let dayClass = "day";
+        if (day === currentDayName) {
+            dayClass += " current-day";
+        }
 
         container.innerHTML += `
-          <div class="day">
+          <div class="${dayClass}">
             <h3>${day}</h3>
             <ul>${fullDay.map((subj, i) => {
               let room = "";
@@ -312,4 +336,5 @@
   </script>
 </body>
 </html>
+
 
